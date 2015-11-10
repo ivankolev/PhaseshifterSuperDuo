@@ -1,0 +1,2 @@
+include 'PhaseshifterAlexandria:alexandria.app',
+        'PhaseshifterFootballScores:footballscores.app'
