@@ -4,4 +4,3 @@ gradle
 build
 gen
 gradlew*
-*.iml
