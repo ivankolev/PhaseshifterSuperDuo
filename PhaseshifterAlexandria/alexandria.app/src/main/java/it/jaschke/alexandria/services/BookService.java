@@ -7,7 +7,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
+import it.jaschke.alexandria.MainActivity;
+import it.jaschke.alexandria.R;
+import it.jaschke.alexandria.data.AlexandriaContract;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,10 +20,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import it.jaschke.alexandria.MainActivity;
-import it.jaschke.alexandria.R;
-import it.jaschke.alexandria.data.AlexandriaContract;
 
 
 /**
@@ -99,7 +97,7 @@ public class BookService extends IntentService {
             final String FORECAST_BASE_URL = "https://www.googleapis.com/books/v1/volumes?";
             final String QUERY_PARAM = "q";
 
-            final String ISBN_PARAM = "isbn:" + ean;
+            final String ISBN_PARAM = "isbn+" + ean;
 
             Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
                     .appendQueryParameter(QUERY_PARAM, ISBN_PARAM)
