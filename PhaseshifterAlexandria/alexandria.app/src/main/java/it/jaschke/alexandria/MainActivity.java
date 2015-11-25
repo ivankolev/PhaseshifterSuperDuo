@@ -12,10 +12,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import it.jaschke.alexandria.api.Callback;
 
@@ -65,23 +69,27 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment nextFragment;
+        String fragmentTag = null;
 
         switch (position){
             default:
             case 0:
                 nextFragment = new ListOfBooks();
+                fragmentTag = "LIST_OF_BOOKS";
                 break;
             case 1:
                 nextFragment = new AddBook();
+                fragmentTag = "ADD_BOOK";
                 break;
             case 2:
                 nextFragment = new About();
+                fragmentTag = "ABOUT";
                 break;
 
         }
 
         fragmentManager.beginTransaction()
-                .replace(R.id.container, nextFragment)
+                .replace(R.id.container, nextFragment, fragmentTag)
                 .addToBackStack((String) title)
                 .commit();
     }
@@ -149,6 +157,27 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 .addToBackStack("Book Detail")
                 .commit();
 
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(result != null) {
+            if(result.getContents() == null) {
+                Log.d("MainActivity", "Cancelled scan");
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                Log.d("MainActivity", "Scanned");
+                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                AddBook addBook = (AddBook) getSupportFragmentManager().findFragmentByTag("ADD_BOOK");
+                addBook.setEan(result.getContents());
+            }
+        } else {
+            Log.d("MainActivity", "Weird");
+            // This is important, otherwise the result will not be passed to the fragment
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     private class MessageReceiver extends BroadcastReceiver {
