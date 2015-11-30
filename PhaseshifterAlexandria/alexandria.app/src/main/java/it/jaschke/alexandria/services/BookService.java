@@ -4,22 +4,32 @@ import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.squareup.okhttp.ResponseBody;
+
 import it.jaschke.alexandria.MainActivity;
 import it.jaschke.alexandria.R;
 import it.jaschke.alexandria.data.AlexandriaContract;
+import it.jaschke.alexandria.data.bookSchema.BookInfo;
+import it.jaschke.alexandria.data.bookSchema.BookResult;
+import it.jaschke.alexandria.data.bookSchema.ImageLinks;
+import it.jaschke.alexandria.data.bookSchema.VolumeInfo;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.JacksonConverterFactory;
+import retrofit.Response;
+import retrofit.Retrofit;
+import retrofit.http.GET;
+import retrofit.http.Query;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.LinkedHashMap;
 
 
 /**
@@ -35,6 +45,8 @@ public class BookService extends IntentService {
     public static final String DELETE_BOOK = "it.jaschke.alexandria.services.action.DELETE_BOOK";
 
     public static final String EAN = "it.jaschke.alexandria.services.extra.EAN";
+
+    public static final String BASE_URL = "https://www.googleapis.com";
 
     public BookService() {
         super("Alexandria");
@@ -55,7 +67,7 @@ public class BookService extends IntentService {
     }
 
     /**
-     * Handle action Foo in the provided background thread with the provided
+     * Handle action deleteBook in the provided background thread with the provided
      * parameters.
      */
     private void deleteBook(String ean) {
@@ -82,83 +94,21 @@ public class BookService extends IntentService {
                 null  // sort order
         );
 
+        assert bookEntry != null;
         if(bookEntry.getCount()>0){
             bookEntry.close();
             return;
         }
 
         bookEntry.close();
+        fetchBookFromGoogle(ean);
+    }
 
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-        String bookJsonString = null;
-
+    private void writeBackInfo(BookInfo result, String ean) {
         try {
-            final String FORECAST_BASE_URL = "https://www.googleapis.com/books/v1/volumes?";
-            final String QUERY_PARAM = "q";
-
-            final String ISBN_PARAM = "isbn+" + ean;
-
-            Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
-                    .appendQueryParameter(QUERY_PARAM, ISBN_PARAM)
-                    .build();
-
-            URL url = new URL(builtUri.toString());
-
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
-            if (inputStream == null) {
-                return;
-            }
-
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                buffer.append(line);
-                buffer.append("\n");
-            }
-
-            if (buffer.length() == 0) {
-                return;
-            }
-            bookJsonString = buffer.toString();
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Error ", e);
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    Log.e(LOG_TAG, "Error closing stream", e);
-                }
-            }
-
-        }
-
-        final String ITEMS = "items";
-
-        final String VOLUME_INFO = "volumeInfo";
-
-        final String TITLE = "title";
-        final String SUBTITLE = "subtitle";
-        final String AUTHORS = "authors";
-        final String DESC = "description";
-        final String CATEGORIES = "categories";
-        final String IMG_URL_PATH = "imageLinks";
-        final String IMG_URL = "thumbnail";
-
-        try {
-            JSONObject bookJson = new JSONObject(bookJsonString);
-            JSONArray bookArray;
-            if(bookJson.has(ITEMS)){
-                bookArray = bookJson.getJSONArray(ITEMS);
+            VolumeInfo volumeInfo;
+            if(result.hasVolumeInfo()){
+                volumeInfo = result.getVolumeInfo();
             }else{
                 Intent messageIntent = new Intent(MainActivity.MESSAGE_EVENT);
                 messageIntent.putExtra(MainActivity.MESSAGE_KEY,getResources().getString(R.string.not_found));
@@ -166,37 +116,72 @@ public class BookService extends IntentService {
                 return;
             }
 
-            JSONObject bookInfo = ((JSONObject) bookArray.get(0)).getJSONObject(VOLUME_INFO);
-
-            String title = bookInfo.getString(TITLE);
+            String title = volumeInfo.getTitle();
 
             String subtitle = "";
-            if(bookInfo.has(SUBTITLE)) {
-                subtitle = bookInfo.getString(SUBTITLE);
+            if(volumeInfo.hasSubtitle()) {
+                subtitle = volumeInfo.getSubtitle();
             }
 
             String desc="";
-            if(bookInfo.has(DESC)){
-                desc = bookInfo.getString(DESC);
+            if(volumeInfo.hasDescription()){
+                desc = volumeInfo.getDescription();
             }
 
             String imgUrl = "";
-            if(bookInfo.has(IMG_URL_PATH) && bookInfo.getJSONObject(IMG_URL_PATH).has(IMG_URL)) {
-                imgUrl = bookInfo.getJSONObject(IMG_URL_PATH).getString(IMG_URL);
+            if(volumeInfo.hasImageLinks()) {
+                ImageLinks imageLinks = volumeInfo.getImageLinks();
+                if(imageLinks.hasThumbnail()){
+                    imgUrl = imageLinks.getThumbnail();
+                }
             }
 
             writeBackBook(ean, title, subtitle, desc, imgUrl);
 
-            if(bookInfo.has(AUTHORS)) {
-                writeBackAuthors(ean, bookInfo.getJSONArray(AUTHORS));
+            if(volumeInfo.hasAuthors()) {
+                writeBackAuthors(ean, new JSONArray(volumeInfo.getAuthors()));
             }
-            if(bookInfo.has(CATEGORIES)){
-                writeBackCategories(ean,bookInfo.getJSONArray(CATEGORIES) );
+            if(volumeInfo.hasCategories()){
+                writeBackCategories(ean, new JSONArray(volumeInfo.getCategories()));
             }
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Error ", e);
         }
+    }
+
+    private void fetchBookFromGoogle(final String ean) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+
+        GoogleBook googleBook = retrofit.create(GoogleBook.class);
+        Call<BookResult> call = googleBook.queryBy(ean);
+        call.enqueue(new Callback<BookResult>() {
+            @Override
+            public void onResponse(Response<BookResult> response, Retrofit retrofit) {
+                // response.isSuccess() is true if the response code is 2xx
+                if (response.isSuccess()) {
+                    BookResult bookResult = response.body();
+                    BookInfo bookInfo = bookResult.getItems().get(0);
+                    writeBackInfo(bookInfo, ean);
+                } else {
+                    int statusCode = response.code();
+
+                    // handle request errors yourself
+                    ResponseBody errorBody = response.errorBody();
+                    Log.d(LOG_TAG,"Protocol error: " + errorBody.toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d(LOG_TAG,"Network Failure");
+                Toast.makeText(getApplicationContext(),
+                        R.string.network_error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void writeBackBook(String ean, String title, String subtitle, String desc, String imgUrl) {
@@ -227,5 +212,12 @@ public class BookService extends IntentService {
             getContentResolver().insert(AlexandriaContract.CategoryEntry.CONTENT_URI, values);
             values= new ContentValues();
         }
+    }
+
+    public interface GoogleBook {
+        @GET("/books/v1/volumes")
+        Call<BookResult> queryBy(
+                @Query("q") String ean
+        );
     }
  }

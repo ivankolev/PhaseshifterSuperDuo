@@ -26,6 +26,10 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
 
     jacoco {
         version = '0.6.2.201302030002'
@@ -55,4 +59,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.journeyapps:zxing-android-embedded:3.0.3@aar'
     compile 'com.google.zxing:core:3.2.1'
+    compile 'com.squareup.retrofit:converter-jackson:2.0.0-beta2'
+    compile 'javax.annotation:javax.annotation-api:1.2'
+    compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
 }
