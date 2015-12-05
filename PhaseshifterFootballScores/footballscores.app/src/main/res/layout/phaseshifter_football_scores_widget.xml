@@ -17,5 +17,13 @@
         android:layout_margin="8dp"
         android:contentDescription="@string/appwidget_text"
         android:background="#09C"/>
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id = "@+id/scores_list_widget"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="15sp"
+        />
+
 
 </RelativeLayout>

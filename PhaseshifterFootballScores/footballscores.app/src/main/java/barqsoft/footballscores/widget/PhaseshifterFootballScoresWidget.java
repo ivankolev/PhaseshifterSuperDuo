@@ -2,7 +2,9 @@ package barqsoft.footballscores.widget;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.RemoteViews;
 import barqsoft.footballscores.R;
 
@@ -11,6 +13,8 @@ import barqsoft.footballscores.R;
  * App Widget Configuration implemented in {@link PhaseshifterFootballScoresWidgetConfigureActivity PhaseshifterFootballScoresWidgetConfigureActivity}
  */
 public class PhaseshifterFootballScoresWidget extends AppWidgetProvider {
+
+    private static final String ACTION_APPWIDGET_UPDATE = "UPDATE_APPWIDGET";
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -39,6 +43,18 @@ public class PhaseshifterFootballScoresWidget extends AppWidgetProvider {
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
     }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        final String action = intent.getAction();
+        if (ACTION_APPWIDGET_UPDATE.equals(action)) {
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            ComponentName thisAppWidget = new ComponentName(context.getPackageName(), PhaseshifterFootballScoresWidget.class.getName());
+            int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
+            onUpdate(context, appWidgetManager, appWidgetIds);
+        }
+    }
+
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
