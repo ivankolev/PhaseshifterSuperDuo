@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="barqsoft.footballscores">
+    package="barqsoft.footballscores" >
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -31,7 +31,24 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="barqsoft.footballscores.MainActivity" />
         </activity>
+
         <service android:name=".service.myFetchService" />
+
+        <receiver android:name=".widget.PhaseshifterFootballScoresWidget" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/phaseshifter_football_scores_widget_info" />
+        </receiver>
+
+        <activity android:name=".widget.PhaseshifterFootballScoresWidgetConfigureActivity" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
