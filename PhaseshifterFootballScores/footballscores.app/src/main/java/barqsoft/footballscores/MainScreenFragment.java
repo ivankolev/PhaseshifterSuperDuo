@@ -1,5 +1,7 @@
 package barqsoft.footballscores;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -14,6 +16,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import barqsoft.footballscores.service.myFetchService;
+import barqsoft.footballscores.widget.PhaseshifterFootballScoresWidget;
+import barqsoft.footballscores.widget.WidgetDataProvider;
 
 /**
  * A placeholder fragment containing a simple view.

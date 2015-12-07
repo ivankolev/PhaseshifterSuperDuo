@@ -10,28 +10,21 @@ import barqsoft.footballscores.R;
 
 /**
  * Implementation of App Widget functionality.
- * App Widget Configuration implemented in {@link PhaseshifterFootballScoresWidgetConfigureActivity PhaseshifterFootballScoresWidgetConfigureActivity}
  */
 public class PhaseshifterFootballScoresWidget extends AppWidgetProvider {
 
-    private static final String ACTION_APPWIDGET_UPDATE = "UPDATE_APPWIDGET";
+    private static final String ACTION_APPWIDGET_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE";
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
-        final int N = appWidgetIds.length;
-        for (int i = 0; i < N; i++) {
-            updateAppWidget(context, appWidgetManager, appWidgetIds[i]);
+        for (int appWidgetId : appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
-        // When the user deletes the widget, delete the preference associated with it.
-        final int N = appWidgetIds.length;
-        for (int i = 0; i < N; i++) {
-            PhaseshifterFootballScoresWidgetConfigureActivity.deleteTitlePref(context, appWidgetIds[i]);
-        }
     }
 
     @Override
@@ -58,11 +51,10 @@ public class PhaseshifterFootballScoresWidget extends AppWidgetProvider {
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
-
-        CharSequence widgetText = PhaseshifterFootballScoresWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
         // Construct the RemoteViews object
+        Intent intent = new Intent(context, WidgetDataService.class);
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.phaseshifter_football_scores_widget);
-        views.setTextViewText(R.id.appwidget_text, widgetText);
+        views.setRemoteAdapter(appWidgetId,intent);
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
