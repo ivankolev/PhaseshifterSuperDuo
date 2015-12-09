@@ -39,4 +39,25 @@
     <string name="add_widget">Add widget</string>
     <string name="home_team_crest">Home Team Crest</string>
     <string name="away_team_crest">Away Team Crest</string>
+    <string name="group_serie_a">Seria A</string>
+    <string name="group_premier_league">Premier League</string>
+    <string name="group_champions_league">UEFA Champions League</string>
+    <string name="group_primera_division">Primera Division</string>
+    <string name="group_bundesliga">Bundesliga</string>
+    <string name="group_unknown">Not known League Please report</string>
+    <string name="group_bundesliga2">Bundesliga 2</string>
+    <string name="group_ligue1">Ligue 1</string>
+    <string name="group_ligue2">Ligue 2</string>
+    <string name="group_segunda_division">Segunda Division</string>
+    <string name="group_primeira_liga">Primeira Liga</string>
+    <string name="group_bundesliga3">Bundesliga 3</string>
+    <string name="group_eredivisie">Eredivisie</string>
+    <string name="champs_group_stage">Group Stages, Matchday : 6</string>
+    <string name="champs_first_round">First Knockout round</string>
+    <string name="champs_quarter_final">QuarterFinal</string>
+    <string name="champs_semi_final">SemiFinal</string>
+    <string name="champs_final">Final</string>
+    <string name="matchday">"Matchday : "</string>
+    <string name="dash">" - "</string>
+    <string name="share_button">Share Button</string>
 </resources>
