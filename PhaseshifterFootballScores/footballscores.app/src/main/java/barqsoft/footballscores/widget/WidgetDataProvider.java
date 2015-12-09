@@ -65,7 +65,7 @@ public class WidgetDataProvider implements RemoteViewsService.RemoteViewsFactory
 
     @Override
     public boolean hasStableIds() {
-        return false;
+        return true;
     }
 
     /*
@@ -75,7 +75,7 @@ public class WidgetDataProvider implements RemoteViewsService.RemoteViewsFactory
     */
     @Override
     public RemoteViews getViewAt(int position) {
-        final RemoteViews remoteView = new RemoteViews(
+        RemoteViews remoteView = new RemoteViews(
                 context.getPackageName(), R.layout.scores_list_item);
         remoteView.setTextViewText(R.id.home_name, itemList.get(position));
         return remoteView;

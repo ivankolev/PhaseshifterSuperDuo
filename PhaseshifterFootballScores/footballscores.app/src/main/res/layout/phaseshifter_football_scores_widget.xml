@@ -1,13 +1,13 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="@dimen/widget_margin"
-                android:background="#09C">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#09C"
+    android:padding="@dimen/widget_margin">
+
     <ListView
+        android:id="@+id/scores_list_widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id = "@+id/scores_list_widget"
         android:divider="@android:color/transparent"
-        android:dividerHeight="15sp"
-        />
-</RelativeLayout>
+        android:dividerHeight="15sp" />
+</LinearLayout>

@@ -21,6 +21,7 @@ public class PhaseshifterFootballScoresWidget extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
+        super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 
     @Override
@@ -46,6 +47,7 @@ public class PhaseshifterFootballScoresWidget extends AppWidgetProvider {
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
             onUpdate(context, appWidgetManager, appWidgetIds);
         }
+        super.onReceive(context, intent);
     }
 
 
@@ -54,7 +56,7 @@ public class PhaseshifterFootballScoresWidget extends AppWidgetProvider {
         // Construct the RemoteViews object
         Intent intent = new Intent(context, WidgetDataService.class);
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.phaseshifter_football_scores_widget);
-        views.setRemoteAdapter(appWidgetId,intent);
+        views.setRemoteAdapter(appWidgetId, R.id.scores_list_widget, intent);
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);

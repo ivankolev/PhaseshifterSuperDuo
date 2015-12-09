@@ -37,4 +37,6 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="home_team_crest">Home Team Crest</string>
+    <string name="away_team_crest">Away Team Crest</string>
 </resources>
